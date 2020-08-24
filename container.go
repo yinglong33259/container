@@ -1,32 +1,33 @@
 package container
 
 import (
+	"errors"
 	"reflect"
 )
 
 type Container struct {
-	Instances map[string]interface{}
+	Objs map[string]interface{}
 }
 
 func NewContainer() *Container {
 	c := &Container{}
-	c.Instances = map[string]interface{}{}
+	c.Objs = map[string]interface{}{}
 	return c
 }
 
 func (p *Container) Add(name string, ins interface{}) {
-	p.Instances[name] = ins
+	p.Objs[name] = ins
 }
 
 func (p *Container) Run() error {
-	for key, v := range p.Instances {
+	for key, v := range p.Objs {
 		err := p.initIns(key, v)
 		if err != nil {
 			return err
 		}
 	}
-	for _, v := range p.Instances {
-		if ins, ok := v.(Instance); ok {
+	for _, v := range p.Objs {
+		if ins, ok := v.(Obj); ok {
 			ins.Init()
 		}
 	}
@@ -38,8 +39,10 @@ func (p *Container) initIns(name string, ins interface{}) error {
 	insType := insValue.Type()
 	for i := 0; i < insType.NumField(); i++ {
 		tag := insType.Field(i).Tag.Get("inject")
-		if v, ok := p.Instances[tag]; ok {
+		if v, ok := p.Objs[tag]; ok {
 			insValue.Field(i).Set(reflect.ValueOf(v))
+		} else {
+			return errors.New("not found inject obj :" + tag)
 		}
 	}
 	return nil

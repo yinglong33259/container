@@ -1,5 +1,5 @@
 package container
 
-type Instance interface {
+type Obj interface {
 	Init() error
 }
