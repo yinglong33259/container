@@ -1,4 +1,4 @@
-module yinglong33259/container
+module github.com/yinglong33259/container
 
 go 1.14
 
